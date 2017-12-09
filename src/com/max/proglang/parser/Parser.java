@@ -1,9 +1,6 @@
 package com.max.proglang.parser;
 
-import com.max.proglang.parser.ast.BinaryExpression;
-import com.max.proglang.parser.ast.Expression;
-import com.max.proglang.parser.ast.NumberExpression;
-import com.max.proglang.parser.ast.UnaryExpression;
+import com.max.proglang.parser.ast.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,6 +89,9 @@ public final class Parser {
         }
         if (match(TokenType.HEX_NUMBER)) {
             return new NumberExpression(Long.parseLong(current.getText(), 16));
+        }
+        if (match(TokenType.WORD)){
+            return new ConstantExpression(current.getText());
         }
         if (match(TokenType.LPAREN)) {
             Expression result = expression();

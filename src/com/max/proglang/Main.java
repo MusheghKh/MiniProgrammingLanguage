@@ -11,7 +11,7 @@ public class Main {
 
     public static void main(String[] args) {
         final String input = "2 + 2";
-        final String input2 = "(2 + 2) * #f";
+        final String input2 = "(PI + 2) * #f";
 
         final List<Token> tokens = new Lexer(input2).tokenize();
         for (Token token : tokens){
