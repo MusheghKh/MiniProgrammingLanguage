@@ -22,16 +22,8 @@ public class Main {
 
         System.out.println();
 
-        final List<Statement> statements = new Parser(tokens).parse();
-        for (Statement statement : statements){
-            System.out.println(statement);
-        }
-
-        System.out.println();
-
-        for (Statement statement : statements){
-            statement.execute();
-        }
-
+        final Statement program = new Parser(tokens).parse();
+        System.out.println(program.toString());
+        program.execute();
     }
 }

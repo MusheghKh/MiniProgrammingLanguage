@@ -2,7 +2,6 @@ package com.max.proglang.parser;
 
 import com.max.proglang.parser.ast.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.max.proglang.parser.ast.ConditionalExpression.*;
@@ -25,12 +24,28 @@ public final class Parser {
         size = tokens.size();
     }
     
-    public List<Statement> parse() {
-        final List<Statement> result = new ArrayList<>();
+    public Statement parse() {
+        final BlockStatement result = new BlockStatement();
         while (!match(TokenType.EOF)) {
             result.add(statement());
         }
         return result;
+    }
+
+    private Statement block(){
+        final BlockStatement block = new BlockStatement();
+        consume(TokenType.LBRACE);
+        while (!match(TokenType.RBRACE)){
+            block.add(statement());
+        }
+        return block;
+    }
+
+    private Statement statementOrBlock(){
+        if (get(0).getType() == TokenType.LBRACE){
+            return block();
+        }
+        return statement();
     }
 
     private Statement statement(){
@@ -39,6 +54,12 @@ public final class Parser {
         }
         if (match(TokenType.IF)){
             return ifElse();
+        }
+        if (match(TokenType.WHILE)){
+            return whileStatement();
+        }
+        if (match(TokenType.FOR)){
+            return forStatement();
         }
         return assignmentStatement();
     }
@@ -56,15 +77,31 @@ public final class Parser {
 
     private Statement ifElse(){
         final Expression condition = expression();
-        final Statement ifStatment = statement();
-        final Statement elseStatment;
+        final Statement ifStatement = statementOrBlock();
+        final Statement elseStatement;
 
         if (match(TokenType.ELSE)){
-            elseStatment = statement();
+            elseStatement = statement();
         }else {
-            elseStatment = null;
+            elseStatement = null;
         }
-        return new IfStatement(condition, ifStatment, elseStatment);
+        return new IfStatement(condition, ifStatement, elseStatement);
+    }
+
+    private Statement whileStatement(){
+        final Expression condition = expression();
+        final Statement statement = statementOrBlock();
+        return new WhileStatement(condition, statement);
+    }
+
+    private Statement forStatement(){
+        final Statement initialization = assignmentStatement();
+        consume(TokenType.COMMA);
+        final Expression termination = expression();
+        consume(TokenType.COMMA);
+        final Statement increment = assignmentStatement();
+        final Statement statement = statementOrBlock();
+        return new ForStatement(initialization, termination, increment, statement);
     }
 
     private Expression expression() {

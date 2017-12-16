@@ -10,18 +10,7 @@ import java.util.Map;
  */
 public final class Lexer {
 
-    private static final String OPERATOR_CHARS = "+-*/()=<>!&|";
-    private static final TokenType[] OPERATOR_TOKENS = {
-            TokenType.PLUS,
-            TokenType.MINUS,
-            TokenType.STAR,
-            TokenType.SLASH,
-            TokenType.LPAREN,
-            TokenType.RPAREN,
-            TokenType.EQ,
-            TokenType.LT,
-            TokenType.GT
-    };
+    private static final String OPERATOR_CHARS = "+-*/(){}=<>!&|,";
 
     private static final Map<String, TokenType> OPERATORS = new HashMap<>();
 
@@ -32,9 +21,12 @@ public final class Lexer {
         OPERATORS.put("/", TokenType.SLASH);
         OPERATORS.put("(", TokenType.LPAREN);
         OPERATORS.put(")", TokenType.RPAREN);
+        OPERATORS.put("{", TokenType.LBRACE);
+        OPERATORS.put("}", TokenType.RBRACE);
         OPERATORS.put("=", TokenType.EQ);
         OPERATORS.put("<", TokenType.LT);
         OPERATORS.put(">", TokenType.GT);
+        OPERATORS.put(",", TokenType.COMMA);
 
         OPERATORS.put("!", TokenType.EXCL);
         OPERATORS.put("&", TokenType.AMP);
@@ -169,6 +161,12 @@ public final class Lexer {
                 break;
             case "else":
                 addToken(TokenType.ELSE);
+                break;
+            case "while":
+                addToken(TokenType.WHILE);
+                break;
+            case "for":
+                addToken(TokenType.FOR);
                 break;
             default:
                 addToken(TokenType.WORD, word);
