@@ -23,16 +23,72 @@ public final class Parser {
         size = tokens.size();
     }
     
-    public List<Expression> parse() {
-        final List<Expression> result = new ArrayList<>();
+    public List<Statement> parse() {
+        final List<Statement> result = new ArrayList<>();
         while (!match(TokenType.EOF)) {
-            result.add(expression());
+            result.add(statement());
         }
         return result;
     }
-    
+
+    private Statement statement(){
+        if (match(TokenType.PRINT)){
+            return new PrintStatement(expression());
+        }
+        if (match(TokenType.IF)){
+            return ifElse();
+        }
+        return assignmentStatement();
+    }
+
+    private Statement assignmentStatement(){
+        // WORD EQ
+        final  Token current = get(0);
+        if (match(TokenType.WORD) && get(0).getType() == TokenType.EQ){
+            final String variable = current.getText();
+            consume(TokenType.EQ);
+            return new AssignmentStatement(variable, expression());
+        }
+        throw new RuntimeException("Unknown Statement");
+    }
+
+    private Statement ifElse(){
+        final Expression condition = expression();
+        final Statement ifStatment = statement();
+        final Statement elseStatment;
+
+        if (match(TokenType.ELSE)){
+            elseStatment = statement();
+        }else {
+            elseStatment = null;
+        }
+        return new IfStatement(condition, ifStatment, elseStatment);
+    }
+
     private Expression expression() {
-        return additive();
+        return conditional();
+    }
+
+    private Expression conditional(){
+        Expression result = additive();
+
+        while (true) {
+            if (match(TokenType.EQ)) {
+                result = new ConditionalExpression('=', result, additive());
+                continue;
+            }
+            if (match(TokenType.LT)) {
+                result = new ConditionalExpression('<', result, additive());
+                continue;
+            }
+            if (match(TokenType.GT)) {
+                result = new ConditionalExpression('>', result, additive());
+                continue;
+            }
+            break;
+        }
+
+        return result;
     }
     
     private Expression additive() {
@@ -85,13 +141,16 @@ public final class Parser {
     private Expression primary() {
         final Token current = get(0);
         if (match(TokenType.NUMBER)) {
-            return new NumberExpression(Double.parseDouble(current.getText()));
+            return new ValueExpression(Double.parseDouble(current.getText()));
         }
         if (match(TokenType.HEX_NUMBER)) {
-            return new NumberExpression(Long.parseLong(current.getText(), 16));
+            return new ValueExpression(Long.parseLong(current.getText(), 16));
         }
         if (match(TokenType.WORD)){
-            return new ConstantExpression(current.getText());
+            return new VariableExpression(current.getText());
+        }
+        if (match(TokenType.TEXT)){
+            return new ValueExpression(current.getText());
         }
         if (match(TokenType.LPAREN)) {
             Expression result = expression();
@@ -100,7 +159,16 @@ public final class Parser {
         }
         throw new RuntimeException("Unknown expression");
     }
-    
+
+    private Token consume(TokenType type){
+        final Token current = get(0);
+        if (type != current.getType()){
+            throw new RuntimeException("Token " + current + " does not match " + type);
+        }
+        pos++;
+        return current;
+    }
+
     private boolean match(TokenType type) {
         final Token current = get(0);
         if (type != current.getType()) return false;

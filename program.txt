@@ -1,0 +1,15 @@
+print "*********START*********\n"
+
+word = (2 + 6) / 2
+word2 = PI + word
+str = "a" * 5 + "ba" * 7 + "\n"
+
+print "str = " + str
+print "word = " + word + "\n"
+print "word2 = " + word2 + "\n"
+
+print 2 = 2
+print "\n"
+
+if (1 < 2) print "1 = 1"
+else print "1 != 1"

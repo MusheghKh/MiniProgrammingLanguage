@@ -8,7 +8,7 @@ import java.util.List;
  */
 public final class Lexer {
 
-    private static final String OPERATOR_CHARS = "+-*/()";
+    private static final String OPERATOR_CHARS = "+-*/()=<>";
     private static final TokenType[] OPERATOR_TOKENS = {
             TokenType.PLUS,
             TokenType.MINUS,
@@ -16,6 +16,9 @@ public final class Lexer {
             TokenType.SLASH,
             TokenType.LPAREN,
             TokenType.RPAREN,
+            TokenType.EQ,
+            TokenType.LT,
+            TokenType.GT
     };
 
     private final String input;
@@ -42,6 +45,8 @@ public final class Lexer {
             } else if (current == '#') {
                 next();
                 tokenizeHexNumber();
+            } else if (current == '"') {
+                tokenizeText();
             } else if (OPERATOR_CHARS.indexOf(current) != -1) {
                 tokenizeOperator();
             } else {
@@ -89,17 +94,68 @@ public final class Lexer {
         next();
     }
 
-    private void tokenizeWord(){
+    private void tokenizeWord() {
         final StringBuilder buffer = new StringBuilder();
         char current = peek(0);
-        while (true){
-            if (!Character.isLetterOrDigit(current) && (current != '_') && (current != '$') ){
+        while (true) {
+            if (!Character.isLetterOrDigit(current) && (current != '_') && (current != '$')) {
                 break;
             }
             buffer.append(current);
             current = next();
         }
-        addToken(TokenType.WORD, buffer.toString());
+
+        final String word = buffer.toString();
+        switch (word) {
+            case "print":
+                addToken(TokenType.PRINT);
+                break;
+            case "if":
+                addToken(TokenType.IF);
+                break;
+            case "else":
+                addToken(TokenType.ELSE);
+                break;
+            default:
+                addToken(TokenType.WORD, word);
+                break;
+        }
+    }
+
+    private void tokenizeText() {
+        next(); // skip "
+        final StringBuilder buffer = new StringBuilder();
+        char current = peek(0);
+        while (true) {
+            if (current == '\\') {
+                current = next();
+                switch (current) {
+                    case '"':
+                        current = next();
+                        buffer.append('"');
+                        continue;
+                    case 'n':
+                        current = next();
+                        buffer.append('\n');
+                        continue;
+                    case 't':
+                        current = next();
+                        buffer.append('\t');
+                        continue;
+                }
+                buffer.append('\\');
+                continue;
+            }
+            if (current == '"') {
+                break;
+            }
+            buffer.append(current);
+            current = next();
+        }
+
+        next(); //skip closing "
+
+        addToken(TokenType.TEXT, buffer.toString());
     }
 
     private char next() {

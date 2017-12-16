@@ -1,5 +1,8 @@
 package com.max.proglang.parser.ast;
 
+import com.max.proglang.lib.NumberValue;
+import com.max.proglang.lib.Value;
+
 /**
  *
  * @author aNNiMON
@@ -15,9 +18,9 @@ public final class UnaryExpression implements Expression {
     }
 
     @Override
-    public double eval() {
+    public Value eval() {
         switch (operation) {
-            case '-': return -expr1.eval();
+            case '-': return new NumberValue(-expr1.eval().asDouble());
             case '+':
             default:
                 return expr1.eval();
