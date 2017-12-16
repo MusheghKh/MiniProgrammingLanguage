@@ -21,16 +21,26 @@ public enum TokenType {
     /**
      * OPERATORS
      * */
-    PLUS,   // +
-    MINUS,  // -
-    STAR,   // *
-    SLASH,  // /
-    EQ,     // =
-    LT,     // <
-    GT,     // >
+    PLUS,       // +
+    MINUS,      // -
+    STAR,       // *
+    SLASH,      // /
+    EQ,         // =
+    EQEQ,       // ==
+    EXCL,       // !
+    EXCLEQ,     // !=
+    LT,         // <
+    LTEQ,       // <=
+    GT,         // >
+    GTEQ,       // >=
 
-    LPAREN, // (
-    RPAREN, // )
+    BAR,        // |
+    BARBAR,     // ||
+    AMP,        // &
+    AMPAMP,     // &&
+
+    LPAREN,     // (
+    RPAREN,     // )
 
     EOF
 }

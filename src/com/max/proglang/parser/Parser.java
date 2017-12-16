@@ -5,6 +5,8 @@ import com.max.proglang.parser.ast.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.max.proglang.parser.ast.ConditionalExpression.*;
+
 /**
  *
  * @author aNNiMON
@@ -66,23 +68,67 @@ public final class Parser {
     }
 
     private Expression expression() {
-        return conditional();
+        return logicalOR();
+    }
+
+    private Expression logicalOR(){
+        Expression result = logicalAnd();
+
+        while (true){
+            if (match(TokenType.BARBAR)){
+                result = new ConditionalExpression(OPERATOR.OR, result, logicalAnd());
+                continue;
+            }
+            break;
+        }
+
+        return result;
+    }
+
+    private Expression logicalAnd(){
+        Expression result = equality();
+
+        while (true){
+            if (match(TokenType.AMPAMP)){
+                result = new ConditionalExpression(OPERATOR.AND, result, equality());
+                continue;
+            }
+            break;
+        }
+
+        return result;
+    }
+
+    private Expression equality(){
+        Expression result = conditional();
+
+        if (match(TokenType.EQEQ)) {
+            return new ConditionalExpression(OPERATOR.EQUALS, result, conditional());
+        }
+        if (match(TokenType.EXCLEQ)) {
+            return new ConditionalExpression(OPERATOR.NOT_EQUALS, result, conditional());
+        }
+        return result;
     }
 
     private Expression conditional(){
         Expression result = additive();
 
         while (true) {
-            if (match(TokenType.EQ)) {
-                result = new ConditionalExpression('=', result, additive());
+            if (match(TokenType.LT)) {
+                result = new ConditionalExpression(OPERATOR.LT, result, additive());
                 continue;
             }
-            if (match(TokenType.LT)) {
-                result = new ConditionalExpression('<', result, additive());
+            if (match(TokenType.LTEQ)) {
+                result = new ConditionalExpression(OPERATOR.LTEQ, result, additive());
                 continue;
             }
             if (match(TokenType.GT)) {
-                result = new ConditionalExpression('>', result, additive());
+                result = new ConditionalExpression(OPERATOR.GT, result, additive());
+                continue;
+            }
+            if (match(TokenType.GTEQ)) {
+                result = new ConditionalExpression(OPERATOR.GTEQ, result, additive());
                 continue;
             }
             break;
