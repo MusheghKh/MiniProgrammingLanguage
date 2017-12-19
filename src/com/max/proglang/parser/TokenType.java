@@ -12,13 +12,16 @@ public enum TokenType {
     TEXT,
 
     /**
-     * KEY WORDS
+     * KEYWORDS
      * */
     PRINT,
     IF,
     ELSE,
     WHILE,
     FOR,
+    DO,
+    BREAK,
+    CONTINUE,
 
     /**
      * OPERATORS

@@ -168,6 +168,15 @@ public final class Lexer {
             case "for":
                 addToken(TokenType.FOR);
                 break;
+            case "do":
+                addToken(TokenType.DO);
+                break;
+            case "break":
+                addToken(TokenType.BREAK);
+                break;
+            case "continue":
+                addToken(TokenType.CONTINUE);
+                break;
             default:
                 addToken(TokenType.WORD, word);
                 break;

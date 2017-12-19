@@ -58,8 +58,20 @@ public final class Parser {
         if (match(TokenType.WHILE)){
             return whileStatement();
         }
+        if (match(TokenType.DO)){
+            return doWhileStatement();
+        }
+        if (match(TokenType.BREAK)){
+            return new BreakStatement();
+        }
+        if (match(TokenType.CONTINUE)){
+            return new ContinueStatement();
+        }
         if (match(TokenType.FOR)){
             return forStatement();
+        }
+        if (get(0).getType() == TokenType.WORD && get(1).getType() == TokenType.LPAREN){
+            return new FunctionStatement(function());
         }
         return assignmentStatement();
     }
@@ -94,6 +106,13 @@ public final class Parser {
         return new WhileStatement(condition, statement);
     }
 
+    private Statement doWhileStatement(){
+        final Statement statement = statementOrBlock();
+        consume(TokenType.WHILE);
+        final Expression condition = expression();
+        return new DoWhileStatment(condition, statement);
+    }
+
     private Statement forStatement(){
         final Statement initialization = assignmentStatement();
         consume(TokenType.COMMA);
@@ -102,6 +121,17 @@ public final class Parser {
         final Statement increment = assignmentStatement();
         final Statement statement = statementOrBlock();
         return new ForStatement(initialization, termination, increment, statement);
+    }
+
+    private FunctionalExpression function(){
+        final String name = consume(TokenType.WORD).getText();
+        consume(TokenType.LPAREN);
+        final FunctionalExpression function = new FunctionalExpression(name);
+        while (!match(TokenType.RPAREN)){
+            function.addArgument(expression());
+            match(TokenType.COMMA);
+        }
+        return function;
     }
 
     private Expression expression() {
@@ -228,6 +258,9 @@ public final class Parser {
         }
         if (match(TokenType.HEX_NUMBER)) {
             return new ValueExpression(Long.parseLong(current.getText(), 16));
+        }
+        if (get(0).getType() == TokenType.WORD && get(1).getType() == TokenType.LPAREN){
+            return function();
         }
         if (match(TokenType.WORD)){
             return new VariableExpression(current.getText());

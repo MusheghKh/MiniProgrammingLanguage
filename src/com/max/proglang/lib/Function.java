@@ -1,0 +1,6 @@
+package com.max.proglang.lib;
+
+public interface Function {
+
+    Value execute(Value... args);
+}
