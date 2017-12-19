@@ -22,6 +22,8 @@ public enum TokenType {
     DO,
     BREAK,
     CONTINUE,
+    DEF,
+    RETURN,
 
     /**
      * OPERATORS

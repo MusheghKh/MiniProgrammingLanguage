@@ -177,6 +177,12 @@ public final class Lexer {
             case "continue":
                 addToken(TokenType.CONTINUE);
                 break;
+            case "def":
+                addToken(TokenType.DEF);
+                break;
+            case "return":
+                addToken(TokenType.RETURN);
+                break;
             default:
                 addToken(TokenType.WORD, word);
                 break;
