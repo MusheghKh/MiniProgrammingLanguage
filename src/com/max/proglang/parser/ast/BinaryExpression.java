@@ -1,5 +1,6 @@
 package com.max.proglang.parser.ast;
 
+import com.max.proglang.lib.ArrayValue;
 import com.max.proglang.lib.NumberValue;
 import com.max.proglang.lib.StringValue;
 import com.max.proglang.lib.Value;
@@ -23,7 +24,7 @@ public final class BinaryExpression implements Expression {
     public Value eval() {
         final Value v1 = expr1.eval();
         final Value v2 = expr2.eval();
-        if (v1 instanceof StringValue) {
+        if ((v1 instanceof StringValue) || (v1 instanceof ArrayValue)) {
             final String s1 = v1.asString();
 
             switch (operation) {

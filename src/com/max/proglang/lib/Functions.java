@@ -27,6 +27,7 @@ public class Functions {
             }
             return NumberValue.ZERO;
         });
+        functions.put("newarray", ArrayValue::new);
     }
 
     public static boolean isExist(String key){

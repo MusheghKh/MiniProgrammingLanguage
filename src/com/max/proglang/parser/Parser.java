@@ -43,7 +43,7 @@ public final class Parser {
     }
 
     private Statement statementOrBlock(){
-        if (get(0).getType() == TokenType.LBRACE){
+        if (lookMatch(0, TokenType.LBRACE)){
             return block();
         }
         return statement();
@@ -77,7 +77,7 @@ public final class Parser {
         if (match(TokenType.DEF)){
             return functionDefine();
         }
-        if (get(0).getType() == TokenType.WORD && get(1).getType() == TokenType.LPAREN){
+        if (lookMatch(0, TokenType.WORD) && lookMatch(1, TokenType.LPAREN)){
             return new FunctionStatement(function());
         }
         return assignmentStatement();
@@ -85,11 +85,19 @@ public final class Parser {
 
     private Statement assignmentStatement(){
         // WORD EQ
-        final  Token current = get(0);
-        if (match(TokenType.WORD) && get(0).getType() == TokenType.EQ){
-            final String variable = current.getText();
+        if (lookMatch(0, TokenType.WORD) && lookMatch(1, TokenType.EQ)){
+            final String variable = consume(TokenType.WORD).getText();
             consume(TokenType.EQ);
             return new AssignmentStatement(variable, expression());
+        }
+        // WORD LBRACKET
+        if (lookMatch(0, TokenType.WORD) && lookMatch(1, TokenType.LBRACKET)){
+            final String variable = consume(TokenType.WORD).getText();
+            consume(TokenType.LBRACKET);
+            final Expression index = expression();
+            consume(TokenType.RBRACKET);
+            consume(TokenType.EQ);
+            return new ArrayAssignmentStatement(variable, index, expression());
         }
         throw new RuntimeException("Unknown Statement");
     }
@@ -151,6 +159,24 @@ public final class Parser {
             match(TokenType.COMMA);
         }
         return function;
+    }
+
+    private Expression array(){
+        consume(TokenType.LBRACKET);
+        final List<Expression> elements = new ArrayList<>();
+        while (!match(TokenType.RBRACKET)){
+            elements.add(expression());
+            match(TokenType.COMMA);
+        }
+        return new ArrayExpression(elements);
+    }
+
+    private Expression element() {
+        final String variable = consume(TokenType.WORD).getText();
+        consume(TokenType.LBRACKET);
+        final Expression index = expression();
+        consume(TokenType.RBRACKET);
+        return new ArrayAccessExpression(variable, index);
     }
 
     private Expression expression() {
@@ -278,8 +304,14 @@ public final class Parser {
         if (match(TokenType.HEX_NUMBER)) {
             return new ValueExpression(Long.parseLong(current.getText(), 16));
         }
-        if (get(0).getType() == TokenType.WORD && get(1).getType() == TokenType.LPAREN){
+        if (lookMatch(0, TokenType.WORD) && lookMatch(1, TokenType.LPAREN)){
             return function();
+        }
+        if (lookMatch(0, TokenType.WORD) && lookMatch(1, TokenType.LBRACKET)){
+            return element();
+        }
+        if (lookMatch(0, TokenType.LBRACKET)){
+            return array();
         }
         if (match(TokenType.WORD)){
             return new VariableExpression(current.getText());
@@ -309,6 +341,10 @@ public final class Parser {
         if (type != current.getType()) return false;
         pos++;
         return true;
+    }
+
+    private boolean lookMatch(int pos, TokenType type){
+        return get(pos).getType() == type;
     }
     
     private Token get(int relativePosition) {
