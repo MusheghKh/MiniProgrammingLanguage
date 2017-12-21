@@ -3,6 +3,7 @@ package com.max.proglang.lib;
 public class NumberValue implements Value {
 
     public static final NumberValue ZERO = new NumberValue(0);
+    public static final NumberValue ONE = new NumberValue(1);
 
     private final double value;
 
@@ -10,8 +11,8 @@ public class NumberValue implements Value {
         this.value = value;
     }
 
-    public NumberValue(boolean value) {
-        this.value = value ? 1 : 0;
+    public static NumberValue fromBoolean(boolean b){
+        return b ? ONE : ZERO;
     }
 
     @Override

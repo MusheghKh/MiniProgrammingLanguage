@@ -11,9 +11,7 @@ public enum TokenType {
     WORD,
     TEXT,
 
-    /**
-     * KEYWORDS
-     * */
+    // keyword
     PRINT,
     IF,
     ELSE,
@@ -24,35 +22,43 @@ public enum TokenType {
     CONTINUE,
     DEF,
     RETURN,
+    USE,
 
-    /**
-     * OPERATORS
-     * */
-    PLUS,       // +
-    MINUS,      // -
-    STAR,       // *
-    SLASH,      // /
-    EQ,         // =
-    EQEQ,       // ==
-    EXCL,       // !
-    EXCLEQ,     // !=
-    LT,         // <
-    LTEQ,       // <=
-    GT,         // >
-    GTEQ,       // >=
+    PLUS, // +
+    MINUS, // -
+    STAR, // *
+    SLASH, // /
+    PERCENT,// %
+    EQ, // =
+    EQEQ, // ==
+    EXCL, // !
+    EXCLEQ, // !=
+    LTEQ, // <=
+    LT, // <
+    GT, // >
+    GTEQ, // >=
 
-    BAR,        // |
-    BARBAR,     // ||
-    AMP,        // &
-    AMPAMP,     // &&
+    LTLT, // <<
+    GTGT, // >>
+    GTGTGT, // >>>
 
-    LPAREN,     // (
-    RPAREN,     // )
-    LBRACKET,   // [
-    RBRACKET,   // ]
-    LBRACE,     // {
-    RBRACE,     // }
-    COMMA,      // ,
+    TILDE, // ~
+    CARET, // ^
+    BAR, // |
+    BARBAR, // ||
+    AMP, // &
+    AMPAMP, // &&
+
+    QUESTION, // ?
+    COLON, // :
+
+    LPAREN, // (
+    RPAREN, // )
+    LBRACKET, // [
+    RBRACKET, // ]
+    LBRACE, // {
+    RBRACE, // }
+    COMMA, // ,
 
     EOF
 }

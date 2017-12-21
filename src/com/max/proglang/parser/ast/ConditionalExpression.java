@@ -4,14 +4,9 @@ import com.max.proglang.lib.NumberValue;
 import com.max.proglang.lib.StringValue;
 import com.max.proglang.lib.Value;
 
-public class ConditionalExpression implements Expression{
+public class ConditionalExpression implements Expression {
 
-    public static enum OPERATOR {
-        PLUS("+"),
-        MINUS("-"),
-        MULTIPLY("*"),
-        DIVIDE("/"),
-
+    public enum Operator {
         EQUALS("=="),
         NOT_EQUALS("!="),
 
@@ -29,15 +24,15 @@ public class ConditionalExpression implements Expression{
             return name;
         }
 
-        OPERATOR(String name) {
+        Operator(String name) {
             this.name = name;
         }
     }
 
     public Expression expr1, expr2;
-    public OPERATOR operator;
+    public Operator operator;
 
-    public ConditionalExpression(OPERATOR operator, Expression expr1, Expression expr2) {
+    public ConditionalExpression(Operator operator, Expression expr1, Expression expr2) {
         this.expr1 = expr1;
         this.expr2 = expr2;
         this.operator = operator;
@@ -48,17 +43,34 @@ public class ConditionalExpression implements Expression{
         final Value v1 = expr1.eval();
         final Value v2 = expr2.eval();
 
+        switch (operator) {
+            case AND:
+                return NumberValue.fromBoolean(
+                        (v1.asDouble() != 0) && v2.asDouble() != 0
+                );
+            case OR:
+                return NumberValue.fromBoolean(
+                        (v1.asDouble() != 0) && (v2.asDouble() != 0)
+                );
+        }
+
         double n1, n2;
         if (v1 instanceof StringValue) {
             n1 = v1.asString().compareTo(v2.asString());
             n2 = 0;
-        }else {
+        } else {
             n1 = v1.asDouble();
             n2 = v2.asDouble();
         }
 
         boolean result;
         switch (operator) {
+            case EQUALS:
+                result = n1 == n2;
+                break;
+            case NOT_EQUALS:
+                result = n1 != n2;
+                break;
             case LT:
                 result = n1 < n2;
                 break;
@@ -71,21 +83,10 @@ public class ConditionalExpression implements Expression{
             case GTEQ:
                 result = n1 >= n2;
                 break;
-            case NOT_EQUALS:
-                result = n1 != n2;
-                break;
-            case AND:
-                result = (n1 != 0) && (n2 != 0);
-                break;
-            case OR:
-                result = (n1 != 0) || (n2 != 0);
-                break;
-            case EQUALS:
             default:
-                result = n1 == n2;
-                break;
+                throw new RuntimeException("Operation " + operator + " is not supported");
         }
-        return new NumberValue(result);
+        return NumberValue.fromBoolean(result);
     }
 
     @Override
@@ -95,6 +96,6 @@ public class ConditionalExpression implements Expression{
 
     @Override
     public String toString() {
-        return String.format("[%s %s %s]", expr1, operator.getName(), expr2);
+        return String.format("%s %s %s", expr1, operator.getName(), expr2);
     }
 }

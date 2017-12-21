@@ -14,7 +14,7 @@ public class VariableExpression implements Expression{
     @Override
     public Value eval() {
         if (!Variables.isExist(name)){
-            throw new RuntimeException("Constant does not exist");
+            throw new RuntimeException("Constant does not exist: " + name);
         }
         return Variables.get(name);
     }

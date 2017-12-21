@@ -12,8 +12,8 @@ import static com.max.proglang.parser.ast.ConditionalExpression.*;
  * @author aNNiMON
  */
 public final class Parser {
-    
-    private static final Token EOF = new Token(TokenType.EOF, "");
+
+    private static final Token EOF = new Token(TokenType.EOF, "", -1, -1);
 
     private final List<Token> tokens;
     private final int size;
@@ -50,41 +50,43 @@ public final class Parser {
     }
 
     private Statement statement(){
-        if (match(TokenType.PRINT)){
+        if (match(TokenType.PRINT)) {
             return new PrintStatement(expression());
         }
-        if (match(TokenType.IF)){
+        if (match(TokenType.IF)) {
             return ifElse();
         }
-        if (match(TokenType.WHILE)){
+        if (match(TokenType.WHILE)) {
             return whileStatement();
         }
-        if (match(TokenType.DO)){
+        if (match(TokenType.DO)) {
             return doWhileStatement();
         }
-        if (match(TokenType.BREAK)){
+        if (match(TokenType.BREAK)) {
             return new BreakStatement();
         }
-        if (match(TokenType.CONTINUE)){
+        if (match(TokenType.CONTINUE)) {
             return new ContinueStatement();
         }
-        if (match(TokenType.RETURN)){
+        if (match(TokenType.RETURN)) {
             return new ReturnStatement(expression());
         }
-        if (match(TokenType.FOR)){
+        if (match(TokenType.USE)) {
+            return new UseStatement(expression());
+        }
+        if (match(TokenType.FOR)) {
             return forStatement();
         }
-        if (match(TokenType.DEF)){
+        if (match(TokenType.DEF)) {
             return functionDefine();
         }
-        if (lookMatch(0, TokenType.WORD) && lookMatch(1, TokenType.LPAREN)){
+        if (lookMatch(0, TokenType.WORD) && lookMatch(1, TokenType.LPAREN)) {
             return new FunctionStatement(function());
         }
         return assignmentStatement();
     }
 
     private Statement assignmentStatement() {
-        // WORD EQ
         if (lookMatch(0, TokenType.WORD) && lookMatch(1, TokenType.EQ)) {
             final String variable = consume(TokenType.WORD).getText();
             consume(TokenType.EQ);
@@ -95,7 +97,7 @@ public final class Parser {
             consume(TokenType.EQ);
             return new ArrayAssignmentStatement(array, expression());
         }
-        throw new RuntimeException("Unknown statement");
+        throw new ParseException("Unknown statement: " + get(0));
     }
 
     private Statement ifElse(){
@@ -124,12 +126,14 @@ public final class Parser {
         return new DoWhileStatement(condition, statement);
     }
 
-    private Statement forStatement(){
+    private Statement forStatement() {
+        match(TokenType.LPAREN);
         final Statement initialization = assignmentStatement();
         consume(TokenType.COMMA);
         final Expression termination = expression();
         consume(TokenType.COMMA);
         final Statement increment = assignmentStatement();
+        match(TokenType.RPAREN);
         final Statement statement = statementOrBlock();
         return new ForStatement(initialization, termination, increment, statement);
     }
@@ -179,7 +183,20 @@ public final class Parser {
     }
 
     private Expression expression() {
-        return logicalOR();
+        return ternary();
+    }
+
+    private Expression ternary() {
+        Expression result = logicalOR();
+
+        if (match(TokenType.QUESTION)) {
+            final Expression trueExpr = expression();
+            consume(TokenType.COLON);
+            final Expression falseExpr = expression();
+            return new TernaryExpression(result, trueExpr, falseExpr);
+        }
+
+        return result;
     }
 
     private Expression logicalOR(){
@@ -187,7 +204,7 @@ public final class Parser {
 
         while (true){
             if (match(TokenType.BARBAR)){
-                result = new ConditionalExpression(OPERATOR.OR, result, logicalAnd());
+                result = new ConditionalExpression(Operator.OR, result, logicalAnd());
                 continue;
             }
             break;
@@ -196,12 +213,12 @@ public final class Parser {
         return result;
     }
 
-    private Expression logicalAnd(){
-        Expression result = equality();
+    private Expression logicalAnd()  {
+        Expression result = bitwiseOr();
 
-        while (true){
-            if (match(TokenType.AMPAMP)){
-                result = new ConditionalExpression(OPERATOR.AND, result, equality());
+        while (true) {
+            if (match(TokenType.AMPAMP)) {
+                result = new ConditionalExpression(Operator.AND, result, bitwiseOr());
                 continue;
             }
             break;
@@ -209,37 +226,80 @@ public final class Parser {
 
         return result;
     }
+
+    private Expression bitwiseOr() {
+        Expression expression = bitwiseXor();
+
+        while (true) {
+            if (match(TokenType.BAR)) {
+                expression = new BinaryExpression(BinaryExpression.Operator.OR, expression, bitwiseXor());
+                continue;
+            }
+            break;
+        }
+
+        return expression;
+    }
+
+    private Expression bitwiseXor() {
+        Expression expression = bitwiseAnd();
+
+        while (true) {
+            if (match(TokenType.CARET)) {
+                expression = new BinaryExpression(BinaryExpression.Operator.XOR, expression, bitwiseAnd());
+                continue;
+            }
+            break;
+        }
+
+        return expression;
+    }
+
+    private Expression bitwiseAnd() {
+        Expression expression = equality();
+
+        while (true) {
+            if (match(TokenType.AMP)) {
+                expression = new BinaryExpression(BinaryExpression.Operator.AND, expression, equality());
+                continue;
+            }
+            break;
+        }
+
+        return expression;
+    }
+
 
     private Expression equality(){
         Expression result = conditional();
 
         if (match(TokenType.EQEQ)) {
-            return new ConditionalExpression(OPERATOR.EQUALS, result, conditional());
+            return new ConditionalExpression(Operator.EQUALS, result, conditional());
         }
         if (match(TokenType.EXCLEQ)) {
-            return new ConditionalExpression(OPERATOR.NOT_EQUALS, result, conditional());
+            return new ConditionalExpression(Operator.NOT_EQUALS, result, conditional());
         }
         return result;
     }
 
-    private Expression conditional(){
-        Expression result = additive();
+    private Expression conditional() {
+        Expression result = shift();
 
         while (true) {
             if (match(TokenType.LT)) {
-                result = new ConditionalExpression(OPERATOR.LT, result, additive());
+                result = new ConditionalExpression(ConditionalExpression.Operator.LT, result, shift());
                 continue;
             }
             if (match(TokenType.LTEQ)) {
-                result = new ConditionalExpression(OPERATOR.LTEQ, result, additive());
+                result = new ConditionalExpression(ConditionalExpression.Operator.LTEQ, result, shift());
                 continue;
             }
             if (match(TokenType.GT)) {
-                result = new ConditionalExpression(OPERATOR.GT, result, additive());
+                result = new ConditionalExpression(ConditionalExpression.Operator.GT, result, shift());
                 continue;
             }
             if (match(TokenType.GTEQ)) {
-                result = new ConditionalExpression(OPERATOR.GTEQ, result, additive());
+                result = new ConditionalExpression(ConditionalExpression.Operator.GTEQ, result, shift());
                 continue;
             }
             break;
@@ -247,55 +307,86 @@ public final class Parser {
 
         return result;
     }
-    
-    private Expression additive() {
-        Expression result = multiplicative();
-        
+
+    private Expression shift() {
+        Expression expression = additive();
+
         while (true) {
-            if (match(TokenType.PLUS)) {
-                result = new BinaryExpression('+', result, multiplicative());
+            if (match(TokenType.LTLT)) {
+                expression = new BinaryExpression(BinaryExpression.Operator.LSHIFT, expression, additive());
                 continue;
             }
-            if (match(TokenType.MINUS)) {
-                result = new BinaryExpression('-', result, multiplicative());
+            if (match(TokenType.GTGT)) {
+                expression = new BinaryExpression(BinaryExpression.Operator.RSHIFT, expression, additive());
+                continue;
+            }
+            if (match(TokenType.GTGTGT)) {
+                expression = new BinaryExpression(BinaryExpression.Operator.URSHIFT, expression, additive());
                 continue;
             }
             break;
         }
-        
-        return result;
+
+        return expression;
     }
+
+        private Expression additive() {
+            Expression result = multiplicative();
+
+            while (true) {
+                if (match(TokenType.PLUS)) {
+                    result = new BinaryExpression(BinaryExpression.Operator.ADD, result, multiplicative());
+                    continue;
+                }
+                if (match(TokenType.MINUS)) {
+                    result = new BinaryExpression(BinaryExpression.Operator.SUBTRACT, result, multiplicative());
+                    continue;
+                }
+                break;
+            }
+
+            return result;
+        }
     
     private Expression multiplicative() {
         Expression result = unary();
-        
+
         while (true) {
-            // 2 * 6 / 3 
             if (match(TokenType.STAR)) {
-                result = new BinaryExpression('*', result, unary());
+                result = new BinaryExpression(BinaryExpression.Operator.MULTIPLY, result, unary());
                 continue;
             }
             if (match(TokenType.SLASH)) {
-                result = new BinaryExpression('/', result, unary());
+                result = new BinaryExpression(BinaryExpression.Operator.DIVIDE, result, unary());
+                continue;
+            }
+            if (match(TokenType.PERCENT)) {
+                result = new BinaryExpression(BinaryExpression.Operator.REMAINDER, result, unary());
                 continue;
             }
             break;
         }
-        
+
         return result;
     }
     
     private Expression unary() {
         if (match(TokenType.MINUS)) {
-            return new UnaryExpression('-', primary());
+            return new UnaryExpression(UnaryExpression.Operator.NEGATE, primary());
+        }
+        if (match(TokenType.EXCL)) {
+            return new UnaryExpression(UnaryExpression.Operator.NOT, primary());
+        }
+        if (match(TokenType.TILDE)) {
+            return new UnaryExpression(UnaryExpression.Operator.COMPLEMENT, primary());
         }
         if (match(TokenType.PLUS)) {
             return primary();
         }
         return primary();
     }
-    
-    private Expression primary() {
+
+        private Expression primary() {
         final Token current = get(0);
         if (match(TokenType.NUMBER)) {
             return new ValueExpression(Double.parseDouble(current.getText()));
@@ -329,7 +420,7 @@ public final class Parser {
     private Token consume(TokenType type){
         final Token current = get(0);
         if (type != current.getType()){
-            throw new RuntimeException("Token " + current + " does not match " + type);
+            throw new ParseException("Token " + current + " doesn't match " + type);
         }
         pos++;
         return current;

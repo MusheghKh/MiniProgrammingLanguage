@@ -18,10 +18,11 @@ public interface Visitor {
     void visit(FunctionalExpression s);
     void visit(IfStatement s);
     void visit(PrintStatement s);
+    void visit(TernaryExpression s);
     void visit(ReturnStatement s);
     void visit(UnaryExpression s);
     void visit(ValueExpression s);
     void visit(VariableExpression s);
     void visit(WhileStatement st);
-
+    void visit(UseStatement st);
 }

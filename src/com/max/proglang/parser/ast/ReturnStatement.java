@@ -28,6 +28,6 @@ public class ReturnStatement extends RuntimeException implements Statement {
 
     @Override
     public String toString() {
-        return "return";
+        return "return " + expression;
     }
 }
