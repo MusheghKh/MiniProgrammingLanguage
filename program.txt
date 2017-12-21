@@ -77,6 +77,9 @@ def sum(a,b) {
 //print a
 
 arr = [1, "text", sum(10, 15), [], ["text", [90, [7 + 6, [50]]]]]
-print arr + "\n"
-arr[0] = arr[0] + 1000 + arr[2]
-print arr
+// print arr + "\n"
+// arr[0] = arr[0] + 1000 + arr[2]
+ print arr[4][1][1][1][0]
+
+array = newarray(2, 2, 2)
+//print array

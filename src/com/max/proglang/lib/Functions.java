@@ -27,7 +27,29 @@ public class Functions {
             }
             return NumberValue.ZERO;
         });
-        functions.put("newarray", ArrayValue::new);
+        functions.put("newarray", new Function() {
+
+            @Override
+            public Value execute(Value... args) {
+                return createArray(args, 0);
+            }
+
+            private ArrayValue createArray(Value[] args, int index) {
+                final int size = (int) args[index].asDouble();
+                final int last = args.length - 1;
+                ArrayValue array = new ArrayValue(size);
+                if (index == last) {
+                    for (int i = 0; i < size; i++) {
+                        array.set(i, NumberValue.ZERO);
+                    }
+                } else if (index < last) {
+                    for (int i = 0; i < size; i++) {
+                        array.set(i, createArray(args, index + 1));
+                    }
+                }
+                return array;
+            }
+        });
     }
 
     public static boolean isExist(String key){

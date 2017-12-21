@@ -83,23 +83,19 @@ public final class Parser {
         return assignmentStatement();
     }
 
-    private Statement assignmentStatement(){
+    private Statement assignmentStatement() {
         // WORD EQ
-        if (lookMatch(0, TokenType.WORD) && lookMatch(1, TokenType.EQ)){
+        if (lookMatch(0, TokenType.WORD) && lookMatch(1, TokenType.EQ)) {
             final String variable = consume(TokenType.WORD).getText();
             consume(TokenType.EQ);
             return new AssignmentStatement(variable, expression());
         }
-        // WORD LBRACKET
-        if (lookMatch(0, TokenType.WORD) && lookMatch(1, TokenType.LBRACKET)){
-            final String variable = consume(TokenType.WORD).getText();
-            consume(TokenType.LBRACKET);
-            final Expression index = expression();
-            consume(TokenType.RBRACKET);
+        if (lookMatch(0, TokenType.WORD) && lookMatch(1, TokenType.LBRACKET)) {
+            final ArrayAccessExpression array = element();
             consume(TokenType.EQ);
-            return new ArrayAssignmentStatement(variable, index, expression());
+            return new ArrayAssignmentStatement(array, expression());
         }
-        throw new RuntimeException("Unknown Statement");
+        throw new RuntimeException("Unknown statement");
     }
 
     private Statement ifElse(){
@@ -171,12 +167,15 @@ public final class Parser {
         return new ArrayExpression(elements);
     }
 
-    private Expression element() {
+    private ArrayAccessExpression element() {
         final String variable = consume(TokenType.WORD).getText();
-        consume(TokenType.LBRACKET);
-        final Expression index = expression();
-        consume(TokenType.RBRACKET);
-        return new ArrayAccessExpression(variable, index);
+        final List<Expression> indices = new ArrayList<>();
+        do {
+            consume(TokenType.LBRACKET);
+            indices.add(expression());
+            consume(TokenType.RBRACKET);
+        } while(lookMatch(0, TokenType.LBRACKET));
+        return new ArrayAccessExpression(variable, indices);
     }
 
     private Expression expression() {
