@@ -2,8 +2,8 @@ package com.max.proglang.parser.ast;
 
 public class WhileStatement implements Statement{
 
-    private final Expression condition;
-    private final Statement statement;
+    public final Expression condition;
+    public final Statement statement;
 
     public WhileStatement(Expression condition, Statement statement) {
         this.condition = condition;
@@ -21,6 +21,11 @@ public class WhileStatement implements Statement{
                 // continue;
             }
         }
+    }
+
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     @Override

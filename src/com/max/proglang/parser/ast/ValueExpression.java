@@ -28,6 +28,11 @@ public final class ValueExpression implements Expression {
     }
 
     @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
     public String toString() {
         return value.asString();
     }

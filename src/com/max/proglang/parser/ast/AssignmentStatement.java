@@ -5,8 +5,8 @@ import com.max.proglang.lib.Variables;
 
 public class AssignmentStatement implements Statement {
 
-    private final String variable;
-    private final Expression expression;
+    public final String variable;
+    public final Expression expression;
 
     public AssignmentStatement(String variable, Expression expression) {
         this.variable = variable;
@@ -17,6 +17,11 @@ public class AssignmentStatement implements Statement {
     public void execute() {
         final Value result = expression.eval();
         Variables.set(variable, result);
+    }
+
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     @Override

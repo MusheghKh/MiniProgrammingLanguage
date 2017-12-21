@@ -2,7 +2,7 @@ package com.max.proglang.parser.ast;
 
 public class FunctionStatement implements Statement{
 
-    private final FunctionalExpression function;
+    public final FunctionalExpression function;
 
     public FunctionStatement(FunctionalExpression function) {
         this.function = function;
@@ -11,6 +11,11 @@ public class FunctionStatement implements Statement{
     @Override
     public void execute() {
         function.eval();
+    }
+
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     @Override

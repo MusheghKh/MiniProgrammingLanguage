@@ -1,11 +1,11 @@
 package com.max.proglang.parser.ast;
 
-public class DoWhileStatment implements Statement{
+public class DoWhileStatement implements Statement{
 
-    private final Expression condition;
-    private final Statement statement;
+    public final Expression condition;
+    public final Statement statement;
 
-    public DoWhileStatment(Expression condition, Statement statement) {
+    public DoWhileStatement(Expression condition, Statement statement) {
         this.condition = condition;
         this.statement = statement;
     }
@@ -21,6 +21,11 @@ public class DoWhileStatment implements Statement{
                 // continue;
             }
         }while (condition.eval().asDouble() != 0);
+    }
+
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     @Override

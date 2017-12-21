@@ -4,6 +4,9 @@ import com.max.proglang.parser.Lexer;
 import com.max.proglang.parser.Parser;
 import com.max.proglang.parser.Token;
 import com.max.proglang.parser.ast.Statement;
+import com.max.proglang.parser.visitors.AssignValidator;
+import com.max.proglang.parser.visitors.FunctionAdder;
+import com.max.proglang.parser.visitors.VariablePrinter;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,6 +27,9 @@ public class Main {
 
         final Statement program = new Parser(tokens).parse();
         System.out.println(program.toString());
+        program.accept(new FunctionAdder());
+        program.accept(new VariablePrinter());
+        program.accept(new AssignValidator());
         program.execute();
     }
 }

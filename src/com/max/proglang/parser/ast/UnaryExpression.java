@@ -9,7 +9,7 @@ import com.max.proglang.lib.Value;
  */
 public final class UnaryExpression implements Expression {
     
-    private final Expression expr1;
+    public final Expression expr1;
     private final char operation;
 
     public UnaryExpression(char operation, Expression expr1) {
@@ -25,6 +25,11 @@ public final class UnaryExpression implements Expression {
             default:
                 return expr1.eval();
         }
+    }
+
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
     
     @Override

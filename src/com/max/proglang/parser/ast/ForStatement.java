@@ -2,10 +2,10 @@ package com.max.proglang.parser.ast;
 
 public class ForStatement implements Statement{
 
-    private final Statement initialization;
-    private final Expression termination;
-    private final Statement increment;
-    private final Statement statement;
+    public final Statement initialization;
+    public final Expression termination;
+    public final Statement increment;
+    public final Statement statement;
 
     public ForStatement(Statement initialization, Expression termination, Statement increment, Statement statement) {
         this.initialization = initialization;
@@ -25,6 +25,11 @@ public class ForStatement implements Statement{
                 // continue;
             }
         }
+    }
+
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     @Override

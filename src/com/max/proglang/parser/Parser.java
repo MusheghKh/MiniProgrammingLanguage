@@ -121,7 +121,7 @@ public final class Parser {
         final Statement statement = statementOrBlock();
         consume(TokenType.WHILE);
         final Expression condition = expression();
-        return new DoWhileStatment(condition, statement);
+        return new DoWhileStatement(condition, statement);
     }
 
     private Statement forStatement(){

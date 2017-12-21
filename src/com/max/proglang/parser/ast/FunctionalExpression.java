@@ -8,7 +8,7 @@ import java.util.List;
 public class FunctionalExpression implements Expression{
 
     private final String name;
-    private final List<Expression> arguments;
+    public final List<Expression> arguments;
 
     public FunctionalExpression(String name) {
         this.name = name;
@@ -46,6 +46,11 @@ public class FunctionalExpression implements Expression{
             return result;
         }
         return function.execute(values);
+    }
+
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     @Override

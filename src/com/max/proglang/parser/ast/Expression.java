@@ -6,7 +6,7 @@ import com.max.proglang.lib.Value;
  *
  * @author aNNiMON
  */
-public interface Expression {
+public interface Expression extends Node {
     
     Value eval();
 }

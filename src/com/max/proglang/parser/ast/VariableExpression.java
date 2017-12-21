@@ -5,7 +5,7 @@ import com.max.proglang.lib.Variables;
 
 public class VariableExpression implements Expression{
 
-    private String name;
+    public String name;
 
     public VariableExpression(String name) {
         this.name = name;
@@ -17,6 +17,11 @@ public class VariableExpression implements Expression{
             throw new RuntimeException("Constant does not exist");
         }
         return Variables.get(name);
+    }
+
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     @Override
